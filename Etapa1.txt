@@ -1,0 +1,48 @@
+Cenário/Domínio da aplicação:
+Sistema de verificação de idade com certificados, permitindo validação.
+-----------------------------
+Recursos:
+Usuario
+Certificado (Certificado de Idade)
+-----------------------------
+Relação:
+UM "Usuario" pode ter VÁRIOS "Certificado". Cada certificado pertence a 1 e somente 1 usuário.
+Cada certificado prova que o usuário atende a uma idade mínima específica.
+-----------------------------
+Modelagem REST:
+
+Usuario
+- id
+- nome
+- email
+- dataNascimento
+
+Certificado
+- id
+- usuarioId
+- idadeMinima
+- emitidoEm
+- expiraEm
+-----------------------------
+Tabela de rotas REST
+
+Usuarios
+
+[POST]   [/usuarios]           [Criar usuário]            [201, 400]
+[GET]    [/usuarios]           [Listar usuários]          [200]
+[GET]    [/usuarios/{id}]      [Buscar usuário]           [200, 404]
+[PUT]    [/usuarios/{id}]      [Atualizar usuário]        [200, 400, 404]
+[DELETE] [/usuarios/{id}]      [Remover usuário]          [204, 404]
+
+
+Certificados
+
+[POST]   [/usuarios/{id}/certificados] [Emitir certificado]              [201, 400, 404]
+[GET]    [/usuarios/{id}/certificados] [Listar certificados do usuário]  [200, 404]
+[GET]    [/certificados/{id}]          [Buscar certificado]              [200, 404]
+[DELETE] [/certificados/{id}]          [Revogar certificado]             [204, 404]
+
+
+Verificação
+
+[POST] [/certificados/{id}/verificar] [Verificar validade] [200, 400, 404]

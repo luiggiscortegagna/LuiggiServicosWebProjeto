@@ -1,0 +1,296 @@
+openapi: 3.1.1
+info:
+  title: API de Certificados
+  version: 1.0.0
+  description: API para gerenciar usuários e emitir/validar certificados.
+
+servers:
+  - url: http://localhost:3000
+
+paths:
+
+  /usuarios:
+    post:
+      summary: Criar usuário
+      tags: [Usuarios]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioEntrada'
+            example:
+              nome: Luiggi Fulano
+              email: luiggi@email.com
+              dataNascimento: 2004-04-04
+      responses:
+        201:
+          description: Usuário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+              example:
+                id: 1
+                nome: Luiggi Fulano
+                email: luiggi@email.com
+                dataNascimento: 2004-04-04
+        400:
+          description: Dados inválidos
+
+    get:
+      summary: Listar usuários
+      tags: [Usuarios]
+      responses:
+        200:
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Usuario'
+              example:
+                - id: 1
+                  nome: Luiggi Fulano
+                  email: luiggi@email.com
+                  dataNascimento: 2004-04-04
+
+  /usuarios/{id}:
+    get:
+      summary: Buscar usuário por ID
+      tags: [Usuarios]
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      responses:
+        200:
+          description: Usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+              example:
+                id: 1
+                nome: Luiggi Fulano
+                email: luiggi@email.com
+                dataNascimento: 2004-04-04
+        404:
+          description: Usuário não encontrado
+
+    put:
+      summary: Atualizar usuário
+      tags: [Usuarios]
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioEntrada'
+            example:
+              nome: Novo Nome
+              email: novo@email.com
+              dataNascimento: 2000-01-01
+      responses:
+        200:
+          description: Usuário atualizado
+          content:
+            application/json:
+              example:
+                id: 1
+                nome: Novo Nome
+                email: novo@email.com
+                dataNascimento: 2000-01-01
+        404:
+          description: Usuário não encontrado
+
+    delete:
+      summary: Remover usuário
+      tags: [Usuarios]
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      responses:
+        204:
+          description: Usuário removido
+        404:
+          description: Usuário não encontrado
+
+  /usuarios/{id}/certificados:
+    post:
+      summary: Emitir certificado de idade
+      tags: [Certificados]
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificadoEntrada'
+            example:
+              idadeMinima: 18
+      responses:
+        201:
+          description: Certificado emitido
+          content:
+            application/json:
+              example:
+                id: 1
+                usuarioId: 1
+                idadeMinima: 18
+                emitidoEm: 2026-01-01T10:00:00Z
+                expiraEm: 2026-02-01T10:00:00Z
+        400:
+          description: Dados inválidos
+        404:
+          description: Usuário não encontrado
+
+    get:
+      summary: Listar certificados do usuário
+      tags: [Certificados]
+      parameters:
+        - $ref: '#/components/parameters/UsuarioId'
+      responses:
+        200:
+          description: Lista de certificados
+          content:
+            application/json:
+              example:
+                - id: 1
+                  usuarioId: 1
+                  idadeMinima: 18
+                  emitidoEm: 2026-01-01T10:00:00Z
+                  expiraEm: 2026-02-01T10:00:00Z
+        404:
+          description: Usuário não encontrado
+
+  /certificados/{id}:
+    get:
+      summary: Buscar certificado por ID
+      tags: [Certificados]
+      parameters:
+        - $ref: '#/components/parameters/CertificadoId'
+      responses:
+        200:
+          description: Certificado encontrado
+          content:
+            application/json:
+              example:
+                id: 1
+                usuarioId: 1
+                idadeMinima: 18
+                emitidoEm: 2026-01-01T10:00:00Z
+                expiraEm: 2026-02-01T10:00:00Z
+        404:
+          description: Certificado não encontrado
+
+    delete:
+      summary: Revogar certificado
+      tags: [Certificados]
+      parameters:
+        - $ref: '#/components/parameters/CertificadoId'
+      responses:
+        204:
+          description: Certificado revogado
+        404:
+          description: Certificado não encontrado
+
+  /certificados/{id}/verificar:
+    post:
+      summary: Verificar validade do certificado
+      tags: [Verificacao]
+      parameters:
+        - $ref: '#/components/parameters/CertificadoId'
+      responses:
+        200:
+          description: Resultado
+          content:
+            application/json:
+              example:
+                valido: true
+                atendeRequisito: true
+        400:
+          description: Certificado inválido
+        404:
+          description: Certificado não encontrado
+
+components:
+
+  parameters:
+    UsuarioId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+    CertificadoId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  schemas:
+
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nome:
+          type: string
+          example: Luiggi Fulano
+        email:
+          type: string
+          example: luiggi@email.com
+        dataNascimento:
+          type: string
+          format: date
+          example: 2004-04-04
+
+    UsuarioEntrada:
+      type: object
+      required: [nome, email, dataNascimento]
+      properties:
+        nome:
+          type: string
+          example: Luiggi Fulano
+        email:
+          type: string
+          example: luiggi@email.com
+        dataNascimento:
+          type: string
+          format: date
+          example: 2004-04-04
+
+    Certificado:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        usuarioId:
+          type: integer
+          example: 1
+        idadeMinima:
+          type: integer
+          example: 18
+        emitidoEm:
+          type: string
+          format: date-time
+          example: 2026-01-01T10:00:00Z
+        expiraEm:
+          type: string
+          format: date-time
+          example: 2026-02-01T10:00:00Z
+
+    CertificadoEntrada:
+      type: object
+      required: [idadeMinima]
+      properties:
+        idadeMinima:
+          type: integer
+          example: 18
