@@ -8,7 +8,7 @@ module.exports = {
     }
 
     if ('id' in dados) {
-      throw new AppError("O campo id não pode ser enviado", 400);
+      throw new AppError("Dados inválidos", 400);
     }
 
     const existente = await repo.buscarPorEmail(dados.email);
@@ -35,7 +35,7 @@ module.exports = {
 
   async atualizar(id, dados) {
     if ('id' in dados) {
-      throw new AppError("O campo id não pode ser alterado", 400);
+      throw new AppError("Dados inválidos", 400);
     }
 
     const atualizado = await repo.atualizar(Number(id), dados);

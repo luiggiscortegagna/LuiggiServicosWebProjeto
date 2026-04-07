@@ -2,12 +2,55 @@ openapi: 3.1.1
 info:
   title: API de Certificados
   version: 1.0.0
-  description: API para gerenciar usuários e emitir/validar certificados.
+  description: API para gerenciar usuários, autenticação e certificados de verificação de idade
 
 servers:
   - url: http://localhost:3000
 
+tags:
+  - name: Auth
+  - name: Usuarios
+  - name: Certificados
+  - name: Verificacao
+
 paths:
+  /auth/login:
+    post:
+      summary: Realizar login por email
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginEntrada'
+            example:
+              email: luiggi@email.com
+      responses:
+        200:
+          description: Token gerado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResposta'
+              example:
+                token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.exemplo
+        400:
+          description: Email obrigatório
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Email obrigatório
+        401:
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Credenciais inválidas
 
   /usuarios:
     post:
@@ -22,7 +65,7 @@ paths:
             example:
               nome: Luiggi Fulano
               email: luiggi@email.com
-              dataNascimento: 2004-04-04
+              dataNascimento: "2004-04-04T00:00:00.000Z"
       responses:
         201:
           description: Usuário criado
@@ -34,9 +77,28 @@ paths:
                 id: 1
                 nome: Luiggi Fulano
                 email: luiggi@email.com
-                dataNascimento: 2004-04-04
+                dataNascimento: "2004-04-04T00:00:00.000Z"
         400:
           description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              examples:
+                dadosInvalidos:
+                  value:
+                    erro: Dados inválidos
+                idInvalido:
+                  value:
+                    erro: Dados inválidos
+        409:
+          description: Email já cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Email já cadastrado
 
     get:
       summary: Listar usuários
@@ -54,7 +116,7 @@ paths:
                 - id: 1
                   nome: Luiggi Fulano
                   email: luiggi@email.com
-                  dataNascimento: 2004-04-04
+                  dataNascimento: "2004-04-04T00:00:00.000Z"
 
   /usuarios/{id}:
     get:
@@ -73,9 +135,15 @@ paths:
                 id: 1
                 nome: Luiggi Fulano
                 email: luiggi@email.com
-                dataNascimento: 2004-04-04
+                dataNascimento: "2004-04-04T00:00:00.000Z"
         404:
           description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Usuário não encontrado
 
     put:
       summary: Atualizar usuário
@@ -91,19 +159,35 @@ paths:
             example:
               nome: Novo Nome
               email: novo@email.com
-              dataNascimento: 2000-01-01
+              dataNascimento: "2000-01-01T00:00:00.000Z"
       responses:
         200:
           description: Usuário atualizado
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
               example:
                 id: 1
                 nome: Novo Nome
                 email: novo@email.com
-                dataNascimento: 2000-01-01
+                dataNascimento: "2000-01-01T00:00:00.000Z"
+        400:
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Dados inválidos
         404:
           description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Usuário não encontrado
 
     delete:
       summary: Remover usuário
@@ -115,11 +199,19 @@ paths:
           description: Usuário removido
         404:
           description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Usuário não encontrado
 
   /usuarios/{id}/certificados:
     post:
       summary: Emitir certificado de idade
       tags: [Certificados]
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/UsuarioId'
       requestBody:
@@ -135,16 +227,51 @@ paths:
           description: Certificado emitido
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/Certificado'
               example:
                 id: 1
                 usuarioId: 1
                 idadeMinima: 18
-                emitidoEm: 2026-01-01T10:00:00Z
-                expiraEm: 2026-02-01T10:00:00Z
+                emitidoEm: "2026-04-07T12:00:00.000Z"
+                expiraEm: "2026-05-07T12:00:00.000Z"
         400:
           description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Dados inválidos
+        401:
+          description: Token ausente ou inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              examples:
+                semToken:
+                  value:
+                    erro: Token não fornecido
+                tokenInvalido:
+                  value:
+                    erro: Token inválido
+        403:
+          description: Acesso negado para operar certificado de outro usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Acesso negado
         404:
           description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Usuário não encontrado
 
     get:
       summary: Listar certificados do usuário
@@ -156,14 +283,24 @@ paths:
           description: Lista de certificados
           content:
             application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Certificado'
               example:
                 - id: 1
                   usuarioId: 1
                   idadeMinima: 18
-                  emitidoEm: 2026-01-01T10:00:00Z
-                  expiraEm: 2026-02-01T10:00:00Z
+                  emitidoEm: "2026-04-07T12:00:00.000Z"
+                  expiraEm: "2026-05-07T12:00:00.000Z"
         404:
           description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Usuário não encontrado
 
   /certificados/{id}:
     get:
@@ -176,25 +313,62 @@ paths:
           description: Certificado encontrado
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/Certificado'
               example:
                 id: 1
                 usuarioId: 1
                 idadeMinima: 18
-                emitidoEm: 2026-01-01T10:00:00Z
-                expiraEm: 2026-02-01T10:00:00Z
+                emitidoEm: "2026-04-07T12:00:00.000Z"
+                expiraEm: "2026-05-07T12:00:00.000Z"
         404:
           description: Certificado não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Certificado não encontrado
 
     delete:
       summary: Revogar certificado
       tags: [Certificados]
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/CertificadoId'
       responses:
         204:
           description: Certificado revogado
+        401:
+          description: Token ausente ou inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              examples:
+                semToken:
+                  value:
+                    erro: Token não fornecido
+                tokenInvalido:
+                  value:
+                    erro: Token inválido
+        403:
+          description: Acesso negado para remover certificado de outro usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Acesso negado
         404:
           description: Certificado não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Certificado não encontrado
 
   /certificados/{id}/verificar:
     post:
@@ -204,18 +378,29 @@ paths:
         - $ref: '#/components/parameters/CertificadoId'
       responses:
         200:
-          description: Resultado
+          description: Resultado da verificação
           content:
             application/json:
+              schema:
+                $ref: '#/components/schemas/VerificacaoResposta'
               example:
                 valido: true
                 atendeRequisito: true
-        400:
-          description: Certificado inválido
         404:
           description: Certificado não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+              example:
+                erro: Certificado não encontrado
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
   parameters:
     UsuarioId:
@@ -233,6 +418,27 @@ components:
         type: integer
 
   schemas:
+    Erro:
+      type: object
+      properties:
+        erro:
+          type: string
+          example: Usuário não encontrado
+
+    LoginEntrada:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          example: luiggi@email.com
+
+    LoginResposta:
+      type: object
+      properties:
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.exemplo
 
     Usuario:
       type: object
@@ -248,8 +454,8 @@ components:
           example: luiggi@email.com
         dataNascimento:
           type: string
-          format: date
-          example: 2004-04-04
+          format: date-time
+          example: "2004-04-04T00:00:00.000Z"
 
     UsuarioEntrada:
       type: object
@@ -263,8 +469,9 @@ components:
           example: luiggi@email.com
         dataNascimento:
           type: string
-          format: date
-          example: 2004-04-04
+          format: date-time
+          example: "2004-04-04T00:00:00.000Z"
+      additionalProperties: false
 
     Certificado:
       type: object
@@ -281,11 +488,11 @@ components:
         emitidoEm:
           type: string
           format: date-time
-          example: 2026-01-01T10:00:00Z
+          example: "2026-04-07T12:00:00.000Z"
         expiraEm:
           type: string
           format: date-time
-          example: 2026-02-01T10:00:00Z
+          example: "2026-05-07T12:00:00.000Z"
 
     CertificadoEntrada:
       type: object
@@ -294,3 +501,14 @@ components:
         idadeMinima:
           type: integer
           example: 18
+      additionalProperties: false
+
+    VerificacaoResposta:
+      type: object
+      properties:
+        valido:
+          type: boolean
+          example: true
+        atendeRequisito:
+          type: boolean
+          example: true
