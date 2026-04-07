@@ -122,6 +122,8 @@ paths:
       tags: [Certificados]
       parameters:
         - $ref: '#/components/parameters/UsuarioId'
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -143,6 +145,8 @@ paths:
                 expiraEm: 2026-02-01T10:00:00Z
         400:
           description: Dados inválidos
+        401:
+          description: Token não fornecido ou inválido
         404:
           description: Usuário não encontrado
 
@@ -190,9 +194,13 @@ paths:
       tags: [Certificados]
       parameters:
         - $ref: '#/components/parameters/CertificadoId'
+      security:
+        - bearerAuth: []
       responses:
         204:
           description: Certificado revogado
+        401:
+          description: Token não fornecido ou inválido
         404:
           description: Certificado não encontrado
 
@@ -216,6 +224,12 @@ paths:
           description: Certificado não encontrado
 
 components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
   parameters:
     UsuarioId:
