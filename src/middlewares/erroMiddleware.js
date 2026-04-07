@@ -1,15 +1,12 @@
 module.exports = (err, req, res, next) => {
-    // erro conhecido
-    if (err.statusCode) {
-        return res.status(err.statusCode).json({
-            erro: err.mensagem
-        });
+    const status = err.statusCode || 500;
+    const message = err.message || "Erro interno do servidor";
+
+    if (status === 500) {
+        console.error(err);
     }
 
-    // erro estranho
-    console.error("Erro inesperado: " + err);
-
-    return res.status(500).json({
-        erro: "Erro interno do servidor"
+    return res.status(status).json({
+        erro: message
     });
 };

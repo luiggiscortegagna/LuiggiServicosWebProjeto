@@ -1,7 +1,7 @@
 // cortesia do gpt.. nem sabia que era pra ter
-class AppError {
+class AppError extends Error {
   constructor(message, statusCode) {
-    this.message = message;
+    super(message);
     this.statusCode = statusCode;
   }
 }

@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Usuario {
-  id              Int            @id @default(autoincrement())
-  nome            String
-  email           String         @unique
-  dataNascimento  DateTime
+  id             Int      @id @default(autoincrement())
+  nome           String
+  email          String   @unique
+  dataNascimento DateTime
 
   certificados    Certificado[]
 }

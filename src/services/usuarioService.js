@@ -2,13 +2,25 @@ const repo = require('../repositories/usuarioRepository');
 const AppError = require('../middlewares/AppError');
 
 module.exports = {
-
   async criar(dados) {
-    if (!dados.nome || !dados.email || !dados.dataNascimento) {
+    if (!dados || !dados.nome || !dados.email || !dados.dataNascimento) {
       throw new AppError("Dados inválidos", 400);
     }
 
-    return await repo.criar(dados);
+    if ('id' in dados) {
+      throw new AppError("O campo id não pode ser enviado", 400);
+    }
+
+    const existente = await repo.buscarPorEmail(dados.email);
+    if (existente) {
+      throw new AppError("Email já cadastrado", 409);
+    }
+
+    return await repo.criar({
+      nome: dados.nome,
+      email: dados.email,
+      dataNascimento: dados.dataNascimento
+    });
   },
 
   async listar() {
@@ -22,8 +34,16 @@ module.exports = {
   },
 
   async atualizar(id, dados) {
+    if ('id' in dados) {
+      throw new AppError("O campo id não pode ser alterado", 400);
+    }
+
     const atualizado = await repo.atualizar(Number(id), dados);
-    if (!atualizado) throw new AppError("Usuário não encontrado", 404);
+
+    if (!atualizado) {
+      throw new AppError("Usuário não encontrado", 404);
+    }
+
     return atualizado;
   },
 

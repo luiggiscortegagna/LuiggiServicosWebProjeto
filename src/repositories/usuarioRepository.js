@@ -1,11 +1,11 @@
 const prisma = require('../config/prisma');
 
 module.exports = {
-
   async criar(dados) {
     return prisma.usuario.create({
       data: {
-        ...dados,
+        nome: dados.nome,
+        email: dados.email,
         dataNascimento: new Date(dados.dataNascimento)
       }
     });
@@ -21,12 +21,19 @@ module.exports = {
     });
   },
 
+  async buscarPorEmail(email) {
+    return prisma.usuario.findUnique({
+      where: { email }
+    });
+  },
+
   async atualizar(id, dados) {
     try {
       return await prisma.usuario.update({
         where: { id },
         data: {
-          ...dados,
+          nome: dados.nome,
+          email: dados.email,
           dataNascimento: new Date(dados.dataNascimento)
         }
       });
