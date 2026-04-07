@@ -19,8 +19,8 @@ function calcularIdade(dataNascimento) {
 
 module.exports = {
 
-  emitir(usuarioId, dados) {
-    const user = userRepo.buscarPorId(Number(usuarioId));
+  async emitir(usuarioId, dados) {
+    const user = await userRepo.buscarPorId(Number(usuarioId));
     if (!user) throw new AppError("Usuário não encontrado", 404);
 
     if (!dados.idadeMinima) {
@@ -31,7 +31,7 @@ module.exports = {
     const expira = new Date();
     expira.setDate(agora.getDate() + 30);
 
-    return certRepo.criar({
+    return await certRepo.criar({
       usuarioId: Number(usuarioId),
       idadeMinima: dados.idadeMinima,
       emitidoEm: agora,
@@ -39,35 +39,33 @@ module.exports = {
     });
   },
 
-  listarPorUsuario(usuarioId) {
-    const user = userRepo.buscarPorId(Number(usuarioId));
+  async listarPorUsuario(usuarioId) {
+    const user = await userRepo.buscarPorId(Number(usuarioId));
     if (!user) throw new AppError("Usuário não encontrado", 404);
 
-    return certRepo.listarPorUsuario(Number(usuarioId));
+    return await certRepo.listarPorUsuario(Number(usuarioId));
   },
 
-  buscarPorId(id) {
-    const cert = certRepo.buscarPorId(Number(id));
+  async buscarPorId(id) {
+    const cert = await certRepo.buscarPorId(Number(id));
     if (!cert) throw new AppError("Certificado não encontrado", 404);
     return cert;
   },
 
-  remover(id) {
-    const ok = certRepo.remover(Number(id));
+  async remover(id) {
+    const ok = await certRepo.remover(Number(id));
     if (!ok) throw new AppError("Certificado não encontrado", 404);
   },
 
-  verificar(id) {
-    const cert = certRepo.buscarPorId(Number(id));
+  async verificar(id) {
+    const cert = await certRepo.buscarPorId(Number(id));
     if (!cert) throw new AppError("Certificado não encontrado", 404);
 
-    const user = userRepo.buscarPorId(cert.usuarioId);
+    const user = await userRepo.buscarPorId(cert.usuarioId);
     if (!user) throw new AppError("Usuário não encontrado", 404);
 
     const valido = new Date() < new Date(cert.expiraEm);
-
     const idade = calcularIdade(user.dataNascimento);
-
     const atendeRequisito = idade >= cert.idadeMinima;
 
     return {

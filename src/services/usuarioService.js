@@ -3,32 +3,32 @@ const AppError = require('../middlewares/AppError');
 
 module.exports = {
 
-  criar(dados) {
+  async criar(dados) {
     if (!dados.nome || !dados.email || !dados.dataNascimento) {
       throw new AppError("Dados inválidos", 400);
     }
 
-    return repo.criar(dados);
+    return await repo.criar(dados);
   },
 
-  listar() {
-    return repo.listar();
+  async listar() {
+    return await repo.listar();
   },
 
-  buscarPorId(id) {
-    const user = repo.buscarPorId(Number(id));
+  async buscarPorId(id) {
+    const user = await repo.buscarPorId(Number(id));
     if (!user) throw new AppError("Usuário não encontrado", 404);
     return user;
   },
 
-  atualizar(id, dados) {
-    const atualizado = repo.atualizar(Number(id), dados);
+  async atualizar(id, dados) {
+    const atualizado = await repo.atualizar(Number(id), dados);
     if (!atualizado) throw new AppError("Usuário não encontrado", 404);
     return atualizado;
   },
 
-  remover(id) {
-    const removido = repo.remover(Number(id));
+  async remover(id) {
+    const removido = await repo.remover(Number(id));
     if (!removido) throw new AppError("Usuário não encontrado", 404);
   }
 };

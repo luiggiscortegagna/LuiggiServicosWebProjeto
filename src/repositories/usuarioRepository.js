@@ -1,35 +1,48 @@
-let usuarios = [];
-let idAtual = 1;
+const prisma = require('../config/prisma');
 
 module.exports = {
 
-  criar(dados) {
-    const usuario = { id: idAtual++, ...dados };
-    usuarios.push(usuario);
-    return usuario;
+  async criar(dados) {
+    return prisma.usuario.create({
+      data: {
+        ...dados,
+        dataNascimento: new Date(dados.dataNascimento)
+      }
+    });
   },
 
-  listar() {
-    return usuarios;
+  async listar() {
+    return prisma.usuario.findMany();
   },
 
-  buscarPorId(id) {
-    return usuarios.find(u => u.id === id);
+  async buscarPorId(id) {
+    return prisma.usuario.findUnique({
+      where: { id }
+    });
   },
 
-  atualizar(id, dados) {
-    const index = usuarios.findIndex(u => u.id === id);
-    if (index === -1) return null;
-
-    usuarios[index] = { id, ...dados };
-    return usuarios[index];
+  async atualizar(id, dados) {
+    try {
+      return await prisma.usuario.update({
+        where: { id },
+        data: {
+          ...dados,
+          dataNascimento: new Date(dados.dataNascimento)
+        }
+      });
+    } catch {
+      return null;
+    }
   },
 
-  remover(id) {
-    const index = usuarios.findIndex(u => u.id === id);
-    if (index === -1) return false;
-
-    usuarios.splice(index, 1);
-    return true;
+  async remover(id) {
+    try {
+      await prisma.usuario.delete({
+        where: { id }
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 };

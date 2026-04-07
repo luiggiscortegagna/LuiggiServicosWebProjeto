@@ -1,27 +1,33 @@
-let certificados = [];
-let idAtual = 1;
+const prisma = require('../config/prisma');
 
 module.exports = {
 
-  criar(dados) {
-    const cert = { id: idAtual++, ...dados };
-    certificados.push(cert);
-    return cert;
+  async criar(dados) {
+    return prisma.certificado.create({
+      data: dados
+    });
   },
 
-  listarPorUsuario(usuarioId) {
-    return certificados.filter(c => c.usuarioId === usuarioId);
+  async listarPorUsuario(usuarioId) {
+    return prisma.certificado.findMany({
+      where: { usuarioId }
+    });
   },
 
-  buscarPorId(id) {
-    return certificados.find(c => c.id === id);
+  async buscarPorId(id) {
+    return prisma.certificado.findUnique({
+      where: { id }
+    });
   },
 
-  remover(id) {
-    const index = certificados.findIndex(c => c.id === id);
-    if (index === -1) return false;
-
-    certificados.splice(index, 1);
-    return true;
+  async remover(id) {
+    try {
+      await prisma.certificado.delete({
+        where: { id }
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 };

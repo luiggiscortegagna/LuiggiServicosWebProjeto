@@ -2,34 +2,34 @@ const service = require('../services/usuarioService');
 
 module.exports = {
 
-  criar(req, res, next) {
+  async criar(req, res, next) {
     try {
-      const data = service.criar(req.body);
+      const data = await service.criar(req.body);
       res.status(201).json(data);
     } catch (err) { next(err); }
   },
 
-  listar(req, res, next) {
+  async listar(req, res, next) {
     try {
-      res.json(service.listar());
+      res.json(await service.listar());
     } catch (err) { next(err); }
   },
 
-  buscar(req, res, next) {
+  async buscar(req, res, next) {
     try {
-      res.json(service.buscarPorId(req.params.id));
+      res.json(await service.buscarPorId(req.params.id));
     } catch (err) { next(err); }
   },
 
-  atualizar(req, res, next) {
+  async atualizar(req, res, next) {
     try {
-      res.json(service.atualizar(req.params.id, req.body));
+      res.json(await service.atualizar(req.params.id, req.body));
     } catch (err) { next(err); }
   },
 
-  remover(req, res, next) {
+  async remover(req, res, next) {
     try {
-      service.remover(req.params.id);
+      await service.remover(req.params.id);
       res.status(204).send();
     } catch (err) { next(err); }
   }
