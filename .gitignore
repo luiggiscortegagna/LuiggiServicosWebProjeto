@@ -2,3 +2,4 @@ node_modules/
 .env
 dev.db
 /src/generated/prisma
+/src/config/jwt.js
