@@ -21,6 +21,12 @@ module.exports = {
     });
   },
 
+  async buscarPorEmail(email) {
+    return await prisma.usuario.findUnique({
+      where: { email }
+    });
+  },
+
   async atualizar(id, dados) {
     try {
       return await prisma.usuario.update({
