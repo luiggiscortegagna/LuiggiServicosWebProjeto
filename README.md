@@ -20,6 +20,8 @@ npx prisma db push
 
 npx prisma migrate dev
 
+y
+
 agora pode rodar:
 
 node .\src\app.js
